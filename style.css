@@ -1,0 +1,50 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+h1,
+h3 {
+  text-align: center;
+  margin: 1em 0;
+  font-weight: 500;
+}
+
+h1 {
+  font-size: 1.65rem;
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+p {
+  margin: .25em 0;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+#chart {
+  position: relative;
+}
+
+#tooltip {
+  position: absolute;
+  opacity: .8;
+  background-color: black;
+  padding: .75em .5em;
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  transform-origin: 150% 150%;
+}
+
+.cell:hover,
+#legend rect,
+#legend line {
+  stroke: black;
+  stroke-width: 1;
+}
