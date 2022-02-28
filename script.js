@@ -5,27 +5,27 @@ function monthName(month) {
   return monthName(date)
 }
 
-function fillColor(baseTemp, variance, colors) {
+function fillColor(baseTemp, variance) {
   const monthTemp = baseTemp + variance
 
-  if (monthTemp < colors[0].variance) {
-    return colors[0].rgb
-  } else if (monthTemp < colors[1].variance) {
-    return colors[1].rgb
-  } else if (monthTemp < colors[2].variance) {
-    return colors[2].rgb
-  } else if (monthTemp < colors[3].variance) {
-    return colors[3].rgb
-  } else if (monthTemp < colors[4].variance) {
-    return colors[4].rgb
-  } else if (monthTemp < colors[5].variance) {
-    return colors[5].rgb
-  } else if (monthTemp < colors[6].variance) {
-    return colors[6].rgb
-  } else if (monthTemp < colors[7].variance) {
-    return colors[7].rgb
+  if (monthTemp < VARIANCE[0]) {
+    return COLORS[0]
+  } else if (monthTemp < VARIANCE[1]) {
+    return COLORS[1]
+  } else if (monthTemp < VARIANCE[2]) {
+    return COLORS[2]
+  } else if (monthTemp < VARIANCE[3]) {
+    return COLORS[3]
+  } else if (monthTemp < VARIANCE[4]) {
+    return COLORS[4]
+  } else if (monthTemp < VARIANCE[5]) {
+    return COLORS[5]
+  } else if (monthTemp < VARIANCE[6]) {
+    return COLORS[6]
+  } else if (monthTemp < VARIANCE[7]) {
+    return COLORS[7]
   } else {
-    return colors[8].rgb
+    return COLORS[8]
   }
 }
 
@@ -57,6 +57,19 @@ function showTooltip(event, data) {
 function hideTooltip() {
   d3.select('#tooltip').remove()
 }
+// Constants
+const VARIANCE = [2.8, 3.9, 5.0,  6.1, 7.2, 8.3, 9.5, 10.6, 11.7, 12.8]
+const COLORS = [
+  'rgb(69, 117, 180)',   // veryDarkBlue 
+  'rgb(116, 173, 209)',  // blue 
+  'rgb(171, 217, 233)',  // lightBlue 
+  'rgb(224, 243, 248)',  // veryLightBlue 
+  'rgb(255, 255, 191)',  // yellow 
+  'rgb(254, 224, 144)',  // lightOrange 
+  'rgb(253, 174, 97)',   // orange 
+  'rgb(244, 109, 67)',   // lightRed 
+  'rgb(215, 48, 39)'     // red 
+]
 
 // Create chart
 const chart = d3.select('body')
@@ -83,19 +96,6 @@ fetch(url)
     const padding = 40
     const paddingBottom = padding + 80
     const paddingLeft = padding + 80
-
-    // Colors
-    const colors = [
-      { rgb: 'rgb(69, 117, 180)', variance: 3.9 },   // veryDarkBlue 
-      { rgb: 'rgb(116, 173, 209)', variance: 5.0 },  // blue 
-      { rgb: 'rgb(171, 217, 233)', variance: 6.1 },  // lightBlue 
-      { rgb: 'rgb(224, 243, 248)', variance: 7.2 },  // veryLightBlue 
-      { rgb: 'rgb(255, 255, 191)', variance: 8.3 },  // yellow 
-      { rgb: 'rgb(254, 224, 144)', variance: 9.4 },  // lightOrange 
-      { rgb: 'rgb(253, 174, 97)', variance: 10.5 },  // orange 
-      { rgb: 'rgb(244, 109, 67)', variance: 11.6 },  // lightRed 
-      { rgb: 'rgb(215, 48, 39)', variance: 12.7 }    // red 
-    ]
 
     // Add description
     chart.append('h3')
@@ -142,7 +142,7 @@ fetch(url)
       .attr('y', d => padding + yScale(d.month) - (barHeight / 2))
       .attr('width', '6')
       .attr('height', barHeight)
-      .attr('fill', d => fillColor(baseTemp, d.variance, colors))
+      .attr('fill', d => fillColor(baseTemp, d.variance))
       .attr('data-month', d => d.month - 1)
       .attr('data-year', d => d.year)
       .attr('data-temp', d => baseTemp - d.variance)
@@ -153,30 +153,37 @@ fetch(url)
     const legendWidth = 37
     const legendHeight = 28
 
-    // Set scale
-    const legendScale = d3.scaleSequential()
-    .domain([d3.min(colors, d => d.variance), d3.max(colors, d => d.variance)])
-    .range([0, 295])
-
     // Add legend colors
     const legend = svg.append('g')
       .attr('id', 'legend')
     legend.selectAll('rect')
-      .data(colors)
+      .data(COLORS)
       .enter()
       .append('rect')
-      .attr('x', d => legendScale(d.variance) + paddingLeft)
+      .attr('x', (_, i) => legendWidth * i + paddingLeft)
       .attr('y', height - padding - legendHeight)
       .attr('width', legendWidth)
       .attr('height', legendHeight)
-      .attr('fill', d => d.rgb)
+      .attr('fill', color => color)
+
+    // Add ticks
+    legend.selectAll('.ticks')
+      .data(VARIANCE)
+      .enter()
+      .append('line')
+      .attr('x1', (_, i) => legendWidth * i + paddingLeft)
+      .attr('y1', () => height - padding)
+      .attr('x2', (_, i) => legendWidth * i + paddingLeft)
+      .attr('y2', () => height - padding + 10)
 
     // Add legend text
     legend.selectAll('text')
-      .data(colors)
+      .data(VARIANCE)
       .enter()
       .append('text')
-      .attr('x', d => legendScale(d.variance) + paddingLeft + legendWidth - 10)
+      .attr('x', (_, i) => legendWidth * i + paddingLeft)
       .attr('y', height - padding + 20)
-      .text(d => d.variance.toFixed(1))
+      .text(d => d.toFixed(1))
+      .style('text-anchor', 'middle')
+      .style('font-size', '.75rem')
   })
